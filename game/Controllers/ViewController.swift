@@ -67,16 +67,23 @@ class ViewController: UIViewController {
     }
 
     private func answerQuestion() {
+        
         switch questionView.style {
             case .correct:
+                animateOnEnded(leftDirection: false)
                 game.answerCurrentQuestion(with: true)
             case .incorrect:
+                animateOnEnded(leftDirection: true)
                 game.answerCurrentQuestion(with: false)
             case .standard:
                 break
         }
+    }
+    
+    private func showNextQuestions() {
+        self.questionView.transform = .identity
+        questionView.transform = CGAffineTransform(scaleX: 0.01, y: 0.01)
         
-        questionView.transform = .identity
         questionView.style = .standard
         scoreLabel.text = "\(game.score) / 10"
         if game.state == .ongoing {
@@ -84,6 +91,21 @@ class ViewController: UIViewController {
         } else {
             questionView.title = "Finished"
         }
+        
+        UIView.animate(withDuration: 0.4, delay: 0.0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.5, options: [], animations: {
+            self.questionView.transform = .identity
+        }, completion:nil)
+    }
+    
+    private func animateOnEnded(leftDirection: Bool) {
+        let screenWidth = UIScreen.main.bounds.width
+        let translationTransform = CGAffineTransform(translationX: leftDirection ? -screenWidth : screenWidth, y: 0)
+        UIView.animate(withDuration: 0.3, animations: {
+            self.questionView.transform = translationTransform
+        }, completion: {(success) in
+                self.showNextQuestions()
+            }
+        )
     }
     
     @objc private func questionLoaded() {
